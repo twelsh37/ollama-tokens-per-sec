@@ -1,0 +1,36 @@
+Model,Prompt
+mistral:7b,Write a step-by-step guide on how to bake a chocolate cake from scratch.
+mistral:7b,Develop a python function that solves the following problem - sudoku game.
+mistral:7b,Create a dialogue between two characters that discusses economic crisis.
+mistral:7b,In a forest there are brave lions living there. Please continue the story.
+mistral:7b,I'd like to book a flight for 4 to Seattle in U.S.
+llama3:8b,Write a step-by-step guide on how to bake a chocolate cake from scratch.
+llama3:8b,Develop a python function that solves the following problem - sudoku game.
+llama3:8b,Create a dialogue between two characters that discusses economic crisis.
+llama3:8b,In a forest there are brave lions living there. Please continue the story.
+llama3:8b,I'd like to book a flight for 4 to Seattle in U.S.
+phi3:3.8b,Write a step-by-step guide on how to bake a chocolate cake from scratch.
+phi3:3.8b,Develop a python function that solves the following problem - sudoku game.
+phi3:3.8b,Create a dialogue between two characters that discusses economic crisis.
+phi3:3.8b,In a forest there are brave lions living there. Please continue the story.
+phi3:3.8b,I'd like to book a flight for 4 to Seattle in U.S.
+gemma:2b,Explain Artificial Intelligence and give its applications.
+gemma:2b,How are machine learning and AI related?
+gemma:2b,What is Deep Learning based on?
+gemma:2b,What is the full form of LSTM?
+gemma:2b,What are different components of GAN?
+gemma:7b,Explain Artificial Intelligence and give its applications.
+gemma:7b,How are machine learning and AI related?
+gemma:7b,What is Deep Learning based on?
+gemma:7b,What is the full form of LSTM?
+gemma:7b,What are different components of GAN?
+llava:7b,Describe the image img\\sample1.jpg
+llava:7b,Describe the image img\\sample2.jpg
+llava:7b,Describe the image img\\sample3.jpg
+llava:7b,Describe the image img\\sample4.jpg
+llava:7b,Describe the image img\\sample5.jpg
+llava:13b,Describe the image img\\sample1.jpg
+llava:13b,Describe the image img\\sample2.jpg
+llava:13b,Describe the image img\\sample3.jpg
+llava:13b,Describe the image img\\sample4.jpg
+llava:13b,Describe the image img\\sample5.jpg
