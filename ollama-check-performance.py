@@ -16,61 +16,70 @@
 # sample4 Photo by Aaron Huber on Unsplash
 # sample5 Photo by Catrine Rasmussen on Unsplash
 
-import csv
 import time
+import pandas as pd
 import requests
+from datetime import datetime
+
 
 API_URL = 'http://localhost:11434/api/generate'
 HEADERS = {"Content-Type": "application/json"}
 CSV_INPUT_FILE = 'prompts.csv'
 CSV_OUTPUT_FILE = 'bench-output.csv'
 
-
 def read_input_csv(input_file):
     """
-    Reads a CSV file and returns data.
-
+    Reads data from a CSV file.
     :param input_file: str, path to the input CSV file
-    :return: list, data from the CSV file as a list of dictionaries
+    :return: list, file content
     """
     try:
-        with open(input_file, newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            data = list(reader)
+        # Use pandas to read the CSV file
+        df = pd.read_csv(input_file)
+        # Convert dataframe into a list of dictionaries (each sublist is a row of the CSV)
+        # to_dict method with 'records' argument is used to realize it
+        data = df.to_dict('records')
         return data
     except Exception as e:
-        print(f"Error occurred while reading static CSV: {e}")
-        exit(1)
+        print(f"Error occurred while reading input CSV: {e}")
 
-
-def write_output_csv(output_file, data):
+def write_output_csv(output_file, data, total_time):
     """
     Writes data to a CSV file.
-
     :param output_file: str, path to the output CSV file
     :param data: list, data to write into the CSV file
+    :param total_time: float, total execution time
     """
-    head = ["model", "prompt", "total_duration time (ms)", "load_duration time (ms)", "prompt eval time (ms)",
-            "eval_count", "performance (tokens/s)"]
+    # List column headers, including the new 'program run time (s)' header
+    head = ["model", "prompt", "total_duration time (ms)", "load_duration time (ms)",
+            "prompt eval time (ms)", "eval_count", "performance (tokens/s)", "program run time (s)"]
+
     try:
-        with open(output_file, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(head)
-            writer.writerows(data)
+        # Create a pandas DataFrame from the data
+        df = pd.DataFrame(data, columns=head[:-1])
+
+        # Add the total_time to the DataFrame as a new row
+        total_time_row = pd.DataFrame([['', '', '', '', '', '', '', total_time]], columns=head)
+        df = pd.concat([df, total_time_row], ignore_index=True)
+
+        # Write the DataFrame to a CSV file
+        df.to_csv(output_file, index=False)
+
     except Exception as e:
         print(f"Error occurred while writing to bench output: {e}")
 
 
-def make_request(model, prompt, timeout_val=30):
+
+def make_request(model, prompt, options, timeout_val=30):
     """
     Make an HTTP request to a specific API.
-
     :param model: str, model name for HTTP request data
     :param prompt: str, prompt for HTTP request data
+    :param options: dict, additional options for controlling request such as num_tokens, temperature, and seed
     :param timeout_val: int, timeout for the HTTP request. Default is 30.
     :return: dict, response from the API
     """
-    data = {"model": model, "prompt": prompt, "stream": False}
+    data = {"model": model, "prompt": prompt, "stream": False, **options}
     try:
         response = requests.post(API_URL, headers=HEADERS, json=data, timeout=timeout_val)
         response.raise_for_status()
@@ -78,7 +87,6 @@ def make_request(model, prompt, timeout_val=30):
         print(f"Error occurred: {error}")
         return None
     return response.json()
-
 
 def process_response(model, prompt, jsonResponse):
     """
@@ -105,35 +113,47 @@ def process_response(model, prompt, jsonResponse):
           f"Performance (tokens/s): {performance}\n")
     return [model, prompt, total_duration, load_duration, prompt_eval_duration, eval_count, performance]
 
-
-def process_request(row, timeout_val):
+def process_request(row, timeout_val, options):
     """
     Process a row of data from CSV file.
-
     :param row: dict, a row from CSV file
     :param timeout_val: int, timeout for the HTTP request
+    :param options: dict, additional parameters for the request
     :return: list, processed response data
     """
     model = row['Model']
     prompt = row['Prompt']
-    jsonResponse = make_request(model, prompt, timeout_val)
+    jsonResponse = make_request(model, prompt, options, timeout_val)
     if jsonResponse is None:
         return
     return process_response(model, prompt, jsonResponse)
 
-
-def main(timeout_val=30):
+def main(runs=1, timeout_val=30):
     """
     Main function to read CSV, process requests and responses, and write to a CSV file.
-
+    :param runs: int, number of runs
     :param timeout_val: int, timeout for the HTTP request
     """
-    start_time = time.time()
-    prompts = read_input_csv(CSV_INPUT_FILE)
-    bench_output_data = [process_request(row, timeout_val) for row in prompts]
-    write_output_csv(CSV_OUTPUT_FILE, bench_output_data)
-    total_time = round(time.time() - start_time, 2)
-    print(f"\n\nTotal execution time: {total_time} seconds")
+    options = {
+        "num_tokens": 50,
+        "temperature": 0.0,
+        "seed": 42
+    }
+
+    for run in range(runs):
+        start_time = time.time()
+
+        prompts = read_input_csv(CSV_INPUT_FILE)
+        bench_output_data = [process_request(row, timeout_val, options) for row in prompts]
+
+        current_time = datetime.now()  # Get the current time
+        formatted_time = current_time.strftime("%Y%m%d%H%M%S")  # Format the time
+        output_file = f"bench-output-{formatted_time}-run-{run + 1}.csv"  # Append formatted time to the output file name
+
+        total_time = round(time.time() - start_time, 2)
+        write_output_csv(output_file, bench_output_data, total_time)  # Write data to the file with the new name
+
+        print(f"\n\nTotal execution time for run {run + 1}: {total_time} seconds")
 
 
 if __name__ == "__main__":
