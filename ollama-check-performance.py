@@ -7,6 +7,8 @@
 # This work was inspired by llm_benchmark by Jason TC Chung
 # https://github.com/aidatatools/ollama-benchmark
 #
+# The program is hardcoded to run against localhost on port 11434. if you run a different configuration
+# then you will need to update the HOST and PORT settings
 #
 # The images used in this program are credited to their creators and were retrieved from Unsplash.com.
 # All images are credited to their original owners
@@ -18,14 +20,17 @@
 
 import time
 import pandas as pd
+import argparse
 import requests
 from datetime import datetime
 
 
-API_URL = 'http://localhost:11434/api/generate'
 HEADERS = {"Content-Type": "application/json"}
 CSV_INPUT_FILE = 'prompts.csv'
 CSV_OUTPUT_FILE = 'bench-output.csv'
+HOST = 'localhost'
+PORT = '11434'
+API_URL = f'http://{HOST}:{PORT}/api/generate'
 
 def read_input_csv(input_file):
     """
@@ -157,4 +162,15 @@ def main(runs=1, timeout_val=30):
 
 
 if __name__ == "__main__":
-    main()
+    # Create the command-line arguments parser
+    parser = argparse.ArgumentParser(description='Generate Benchmarking statistics from Ollama hosted models')
+    parser.add_argument('-t', '--timeout', type=int, required=False, default=30,
+                        help='Timeout period in seconds. Default is 30 seconds')
+    parser.add_argument('-r', '--run', type=int, required=False, default=1,
+                        help='Number of itterations you want to run. Default is 1')
+
+    # Parse command-line arguments
+    args = parser.parse_args()
+
+    # Call the main function with the values of the command-line arguments
+    main(args.run, args.timeout)
