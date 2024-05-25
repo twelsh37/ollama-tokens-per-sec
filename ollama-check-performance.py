@@ -57,21 +57,18 @@ def write_output_csv(output_file, data, total_time):
     """
     # List column headers, including the new 'program run time (s)' header
     head = ["model", "prompt", "total_duration time (ms)", "load_duration time (ms)",
-            "prompt eval time (ms)", "eval_count", "performance (tokens/s)", "program run time (s)"]
-
+            "prompt eval time (ms)", "eval_count", "eval_duration", "performance (tokens/s)", "program run time (s)"]
     try:
         # Create a pandas DataFrame from the data
         df = pd.DataFrame(data, columns=head[:-1])
-
         # Add the total_time to the DataFrame as a new row
-        total_time_row = pd.DataFrame([['', '', '', '', '', '', '', total_time]], columns=head)
+        total_time_row = pd.DataFrame([['', '', '', '', '', '', '', '', total_time]], columns=head)
         df = pd.concat([df, total_time_row], ignore_index=True)
-
         # Write the DataFrame to a CSV file
         df.to_csv(output_file, index=False)
-
     except Exception as e:
         print(f"Error occurred while writing to bench output: {e}")
+
 
 
 
@@ -115,8 +112,9 @@ def process_response(model, prompt, jsonResponse):
           f"Total Duration Time (ms): {total_duration}\n"
           f"Load Duration Time (ms): {load_duration}\n"
           f"Prompt Eval Time (ms): {prompt_eval_duration}\n"
+          f"Response Generation Time (ms): {eval_duration}\n"
           f"Performance (tokens/s): {performance}\n")
-    return [model, prompt, total_duration, load_duration, prompt_eval_duration, eval_count, performance]
+    return [model, prompt, total_duration, load_duration, prompt_eval_duration, eval_count, eval_duration, performance]
 
 def process_request(row, timeout_val, options):
     """
