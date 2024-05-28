@@ -55,8 +55,8 @@ def write_output_csv(output_file: str, data: List[Dict[str, Union[str, int, floa
         print(f"Error occurred while writing to bench output: {e}")
 
 
-def make_request(model: str, prompt: str, options: Dict[str, Union[int, float]], timeout_val: int = 30) -> Optional[
-    Dict]:
+def make_request(model: str, prompt: str, options: Dict[str, Union[int, float]], timeout_val: int = 30) \
+        -> Optional[Dict]:
     data = {"model": model, "prompt": prompt, "stream": False, **options}
     try:
         response = requests.post(API_URL, headers=HEADERS, json=data, timeout=timeout_val)
@@ -67,27 +67,29 @@ def make_request(model: str, prompt: str, options: Dict[str, Union[int, float]],
     return response.json()
 
 
-def process_response(model: str, prompt: str, jsonResponse: Dict) -> List[Union[str, int, float]]:
-    get_value_ms = lambda key: round(float(jsonResponse.get(key, 0)) / (10 ** 6), 2)
+def process_response(model: str, prompt: str, jsonresponse: Dict) -> List[Union[str, int, float]]:
+    get_value_ms = lambda key: round(float(jsonresponse.get(key, 0)) / (10 ** 6), 2)
     total_duration = get_value_ms("total_duration")
     load_duration = get_value_ms("load_duration")
     prompt_eval_duration = get_value_ms("prompt_eval_duration")
     eval_duration = get_value_ms("eval_duration")
-    eval_count = jsonResponse.get("eval_count", 0)
+    eval_count = jsonresponse.get("eval_count", 0)
     performance = round(eval_count / eval_duration * 1000,
                         2) if eval_duration else "Undefined (No evaluation iterations)"
     print(
-        f"\nModel: {model}\n Prompt: {prompt}\n Total Duration Time (ms): {total_duration}\n Load Duration Time (ms): {load_duration}\n Prompt Eval Time (ms): {prompt_eval_duration}\n Response Generation Time (ms): {eval_duration}\n Performance (tokens/s): {performance}\n")
+        f"\nModel: {model}\n Prompt: {prompt}\n Total Duration Time (ms): {total_duration}\n Load Duration Time (ms):"
+        f" {load_duration}\n Prompt Eval Time (ms): {prompt_eval_duration}\n Response Generation Time (ms): "
+        f"{eval_duration}\n Performance (tokens/s): {performance}\n")
     return [model, prompt, total_duration, load_duration, prompt_eval_duration, eval_count, eval_duration, performance]
 
 
 def process_request(row: Dict, timeout_val: int, options: Dict[str, Union[int, float]]) -> List[Union[str, int, float]]:
     model = row['Model']
     prompt = row['Prompt']
-    jsonResponse = make_request(model, prompt, options, timeout_val)
-    if jsonResponse is None:
+    jsonresponse = make_request(model, prompt, options, timeout_val)
+    if jsonresponse is None:
         return
-    return process_response(model, prompt, jsonResponse)
+    return process_response(model, prompt, jsonresponse)
 
 
 def main(runs: int = 1, timeout_val: int = 30) -> None:
