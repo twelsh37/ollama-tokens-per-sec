@@ -41,12 +41,13 @@ options:
 ```
 Bear in mind that the program will run incredibly slowly on a system without a GPU. The chart below was executed on my desktop and laptop. laptop timings are in orange, desktop in blue.
 
-![img_1.png](img_1.png)
+
 
 ## Program output
-When the program is sunning it will post output to the console.
-When the program completes it will write out a csv file to whatever path you have defined in 'CSV_OUTPUT_FILE'
+When the program is running, it will post output to the console.
+When the program completes, it will write out a csv file to whatever path you have defined in 'CSV_OUTPUT_FILE'
 
+![td2](https://github.com/twelsh37/ollama-tokens-per-sec/assets/4956770/bcaa49f9-febf-4552-ae74-403357ae47ed)
 
 ## Language Models and Prompts
 The prompt.csv file is what the program uses to run its tests.
