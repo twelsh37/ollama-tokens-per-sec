@@ -1,4 +1,6 @@
 # Description ollama-check-performance.py
+# Author twelsh37@gmail.com
+# Licence MIT Licence
 #
 # This program was created to provide benchmarking statistics for a medium article I am writing.
 # it provides a consistent set of instructions to various LLMS which are specified in the first
