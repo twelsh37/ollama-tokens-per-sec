@@ -25,7 +25,7 @@ import subprocess
 import sys
 import time
 from datetime import datetime
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, NoReturn
 
 import pandas as pd
 import requests
@@ -39,18 +39,33 @@ PORT: str = '11434'
 API_URL: str = f'http://{HOST}:{PORT}/api/generate'
 
 
-def check_models():
-    models = []
-    with open("prompts.csv", "r") as file:
-        reader = csv.DictReader(file)
-        models = [row['Model'] for row in reader]  # take model names from each row
-    process = subprocess.Popen(["ollama", "list"], stdout=subprocess.PIPE)
-    output = process.communicate()[0]
-    installed_models = output.decode("utf-8").split()
-    for model in models:
-        if model not in installed_models:
-            print(f"Model {model} is not installed. Please install it and re-run the program.")
-            sys.exit(2)  # exit with an error code of 2
+def check_models() -> NoReturn:
+    """
+    Validates whether the models required by the application are installed in the system
+    by comparing the list of models in a CSV file to the list of installed models.
+
+    The models should be specified in a file named 'prompts.csv'. The required model names
+    are expected in a field named 'Model'. The installed models are fetched by running
+    the 'ollama list' command.
+
+    If any of the required models is not found among the installed ones, the function
+    displays an error message and terminates the application with exit code 2.
+    """
+    try:
+        models = []
+        with open("prompts.csv", "r") as file:
+            reader = csv.DictReader(file)
+            models = [row['Model'] for row in reader]  # take model names from each row
+        process = subprocess.Popen(["ollama", "list"], stdout=subprocess.PIPE)
+        output = process.communicate()[0]
+        installed_models = output.decode("utf-8").split()
+        for model in models:
+            if model not in installed_models:
+                print(f"Model {model} is not installed. Please install it and re-run the program.")
+                sys.exit(2)  # exit with an error code of 2
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        sys.exit(1)  # exit with a general error code of 1
 
 
 def read_input_csv(input_file: str) -> List[Dict[str, Union[str, int, float]]]:
