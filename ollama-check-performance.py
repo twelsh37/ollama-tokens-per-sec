@@ -19,12 +19,17 @@
 # sample3 Photo by Jud Mackrill on Unsplash
 # sample4 Photo by Aaron Huber on Unsplash
 # sample5 Photo by Catrine Rasmussen on Unsplash
-import time
-from typing import List, Dict, Optional, Union
-import pandas as pd
 import argparse
-import requests
+import csv
+import subprocess
+import sys
+import time
 from datetime import datetime
+from typing import List, Dict, Optional, Union
+
+import pandas as pd
+import requests
+
 
 HEADERS: Dict[str, str] = {"Content-Type": "application/json"}
 CSV_INPUT_FILE: str = 'prompts.csv'
@@ -32,6 +37,20 @@ CSV_OUTPUT_FILE: str = 'bench-output.csv'
 HOST: str = 'localhost'
 PORT: str = '11434'
 API_URL: str = f'http://{HOST}:{PORT}/api/generate'
+
+
+def check_models():
+    models = []
+    with open("prompts.csv", "r") as file:
+        reader = csv.DictReader(file)
+        models = [row['Model'] for row in reader]  # take model names from each row
+    process = subprocess.Popen(["ollama", "list"], stdout=subprocess.PIPE)
+    output = process.communicate()[0]
+    installed_models = output.decode("utf-8").split()
+    for model in models:
+        if model not in installed_models:
+            print(f"Model {model} is not installed. Please install it and re-run the program.")
+            sys.exit(2)  # exit with an error code of 2
 
 
 def read_input_csv(input_file: str) -> List[Dict[str, Union[str, int, float]]]:
@@ -118,4 +137,7 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--run', type=int, required=False, default=1,
                         help='Number of itterations you want to run. Default is 1')
     args = parser.parse_args()
+
+    check_models()
+
     main(args.run, args.timeout)
