@@ -34,6 +34,11 @@ options:
   -r RUN, --run RUN     Number of itterations you want to run. Default is 1
 ```
 
+## Program output
+When the program is sunning it will post output to the console.
+When the program completes it will write out a csv file to what ever path you have defined in 'CSV_OUTPUT_FILE'
+
+
 ## Language Models and Prompts
 The prompt.csv file is what the program uses to run its tests.
 it is a simple file with two columns.
